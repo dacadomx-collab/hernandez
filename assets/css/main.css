@@ -1,0 +1,394 @@
+/* =============================================================================
+   assets/css/main.css — [NOMBRE_DEL_PROYECTO]
+   Mobile-First | ARF-Grid (Adaptive Responsive Flex) | Modo Oscuro fluido
+   Mandamiento #1: nacer para celular, sin anchos fijos en contenedores.
+   Mandamiento #3: contraste mínimo WCAG 4.5:1.
+   Prohibido: !important, estilos inline.
+   ============================================================================= */
+
+:root {
+    /* Paleta ALISER (Estilo ORO) — confirmada por el Arquitecto 2026-07-14 */
+    --color-bg: #F8F9FA;           /* Fondo del Dashboard */
+    --color-bg-alt: #FFFFFF;       /* Fondo de las tarjetas */
+    --color-text: #2C3E50;         /* Azul Marino Oscuro — textos principales/header */
+    --color-text-muted: #5D6D7E;   /* Derivado del Azul Marino — no forma parte del token oficial ALISER */
+    --color-primary: #C0392B;      /* Rojo Institucional Aliser */
+    --color-accent: #F1C40F;       /* Dorado/Oro Aliser — acentos y hover */
+    --color-border: #e2e8f0;
+    --space-xs: 0.5rem;
+    --space-sm: 1rem;
+    --space-md: 1.5rem;
+    --space-lg: 2.5rem;
+    --radius: 0.5rem;
+    --container-max: 1400px;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-bg: #0b1120;
+        --color-bg-alt: #111827;
+        --color-text: #f1f5f9;
+        --color-text-muted: #cbd5e1;
+        --color-primary: #38bdf8;
+        --color-border: #1e293b;
+    }
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.5;
+}
+
+img,
+video {
+    max-width: 100%;
+    height: auto;
+}
+
+/* ── CONTENEDOR MAESTRO: ancho fluido con tope vía variable nativa ───────── */
+.container {
+    width: 100%;
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--space-md);
+}
+
+/* ── ARF-GRID (Adaptive Responsive Foundation): 100% responsivo, cero px fijos */
+.arf-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: stretch;
+    gap: var(--space-md);
+    width: 100%;
+    padding: var(--space-md);
+}
+
+.arf-grid > * {
+    flex: 1 1 100%;
+}
+
+@media (min-width: 640px) {
+    .arf-grid > .arf-col-2 {
+        flex: 1 1 calc(50% - var(--space-md));
+    }
+}
+
+@media (min-width: 960px) {
+    .arf-grid > .arf-col-3 {
+        flex: 1 1 calc(33.333% - var(--space-md));
+    }
+    .arf-grid > .arf-col-4 {
+        flex: 1 1 calc(25% - var(--space-md));
+    }
+}
+
+.card {
+    background-color: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: var(--space-md);
+}
+
+/* ── FORMULARIOS (login y afines) ─────────────────────────────────────────── */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+label {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+}
+
+input,
+button {
+    width: 100%;
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius);
+    border: 1px solid var(--color-border);
+    font-size: 1rem;
+    font-family: inherit;
+}
+
+button {
+    background-color: var(--color-primary);
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    margin-top: var(--space-xs);
+    transition: background-color 0.15s ease-in-out;
+}
+
+button:hover:not(:disabled) {
+    background-color: var(--color-accent);
+    color: var(--color-text);
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+#login-error {
+    color: #dc2626;
+    min-height: 1.25rem;
+}
+
+/* ── PANTALLA DE LOGIN (institucional, Estilo ORO) ────────────────────────── */
+.login-body {
+    min-height: 100vh;
+}
+
+.login-shell {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-md);
+}
+
+.login-card {
+    width: 100%;
+    max-width: 24rem;
+    box-shadow: 0 10px 30px rgba(44, 62, 80, 0.15);
+}
+
+.login-card__header {
+    text-align: center;
+    margin-bottom: var(--space-sm);
+}
+
+.login-card__title {
+    margin: 0;
+    color: var(--color-text);
+    font-size: 1.5rem;
+}
+
+.login-card__subtitle {
+    margin: var(--space-xs) 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+/* ── GRID DE COLUMNAS (equivalente Bootstrap, self-contained en main.css) ──── */
+.col-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+}
+
+@media (min-width: 768px) {
+    .col-md-4 {
+        flex: 0 0 33.333%;
+        max-width: 33.333%;
+    }
+}
+
+@media (min-width: 992px) {
+    .col-lg-2 {
+        flex: 0 0 16.666%;
+        max-width: 16.666%;
+    }
+}
+
+/* ── HEADER + MENÚ HAMBURGUESA ────────────────────────────────────────────── */
+.app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.app-header__title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.hamburger-btn {
+    width: auto;
+    padding: var(--space-xs);
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.hamburger-menu {
+    display: none;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding: var(--space-md);
+    background-color: var(--color-bg-alt);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.hamburger-menu.is-open {
+    display: flex;
+}
+
+.hamburger-menu a {
+    color: var(--color-text);
+    text-decoration: none;
+    padding: var(--space-xs) 0;
+}
+
+/* ── TARJETAS DE MÓDULO (Dashboard 5 Módulos) ─────────────────────────────── */
+.card-modulo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    aspect-ratio: 1 / 1;
+    text-decoration: none;
+    color: var(--color-text);
+    gap: var(--space-xs);
+    position: relative;
+    z-index: 1;
+}
+
+.card-modulo:hover {
+    z-index: 2;
+    border-color: var(--color-accent);
+}
+
+.card-modulo__icono {
+    font-size: 2rem;
+}
+
+.card-modulo__nombre {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* ── SEMÁFOROS DE PERMISOS (Módulo 1) ─────────────────────────────────────── */
+/* Nota: el "verde" no forma parte de la paleta ALISER entregada (solo Rojo,
+   Dorado y Azul Marino) — se usa un verde semántico estándar (#27AE60) para
+   preservar el significado universal de "aprobado" en un semáforo. Pendiente
+   de confirmación del Arquitecto si existe un verde institucional oficial. */
+.semaforo-grupo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-xs) 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.semaforo-etiqueta {
+    font-size: 0.9rem;
+}
+
+.semaforo-dots {
+    display: flex;
+    gap: var(--space-xs);
+}
+
+.semaforo-dot {
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    border-radius: 50%;
+    border: 2px solid var(--color-border);
+    cursor: pointer;
+    opacity: 0.35;
+}
+
+.semaforo-dot--rojo {
+    background-color: var(--color-primary);
+}
+
+.semaforo-dot--amarillo {
+    background-color: var(--color-accent);
+}
+
+.semaforo-dot--verde {
+    background-color: #27AE60;
+}
+
+.semaforo-dot.is-activo {
+    opacity: 1;
+    border-color: var(--color-text);
+}
+
+#gastos-lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+#gastos-lista li {
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-xs);
+    font-size: 0.9rem;
+}
+
+/* ── BOTÓN DE PÁNICO (flotante, solo rol presidente) ──────────────────────── */
+.panic-btn {
+    position: fixed;
+    bottom: var(--space-md);
+    right: var(--space-md);
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    background-color: var(--color-primary);
+    color: #ffffff;
+    border: none;
+    font-size: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    z-index: 10;
+}
+
+/* ── ANIMACIÓN DEL MODO OCULTO (Botón de Pánico) ──────────────────────────── */
+.card-modulo {
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.card-modulo.is-hiding {
+    opacity: 0;
+    transform: scale(0.8);
+    pointer-events: none;
+}
+
+/* ── BANNER DE INSTALACIÓN PWA ─────────────────────────────────────────────── */
+.pwa-install-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    padding: var(--space-xs) var(--space-md);
+    background-color: var(--color-accent);
+    color: var(--color-text);
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.pwa-install-banner button {
+    width: auto;
+    background: transparent;
+    border: none;
+    color: var(--color-text);
+    font-size: 1rem;
+    padding: 0 var(--space-xs);
+    margin-top: 0;
+}
+
+/* ── UTILIDAD: ocultar sin remover del DOM (Modo Oculto del Botón de Pánico) ─ */
+.is-hidden {
+    display: none;
+}

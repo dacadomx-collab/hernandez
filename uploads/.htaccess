@@ -1,0 +1,13 @@
+# uploads/.htaccess — Bloqueo de ejecución de scripts en contenido subido por usuarios
+# Mandamiento #2: Seguridad Nivel Militar — un archivo "imagen" malicioso jamás debe poder ejecutarse.
+
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+
+<FilesMatch "\.(php|php\d|phtml|pl|py|cgi|asp|aspx|sh|exe)$">
+    Require all denied
+</FilesMatch>
+
+Options -ExecCGI
+AddHandler cgi-script .php .php3 .php4 .php5 .phtml .pl .py .cgi .asp .aspx .sh .exe
