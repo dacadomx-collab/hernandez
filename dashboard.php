@@ -70,6 +70,9 @@ $modulos = [
 
     <nav class="hamburger-menu" id="hamburger-menu">
         <a href="dashboard.php">Dashboard</a>
+        <?php if (in_array($rol, ['admin', 'presidente'], true)): ?>
+            <a href="admin_obras.php">Alta de Obras</a>
+        <?php endif; ?>
         <a href="api/auth_logout.php">Cerrar sesión</a>
     </nav>
 

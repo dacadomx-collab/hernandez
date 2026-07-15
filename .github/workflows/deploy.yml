@@ -28,4 +28,4 @@ jobs:
             **/.env**
             **/knowledge/**
             **/logs/**
-            **/backups/**
+            **/backups_y_pruebas/**

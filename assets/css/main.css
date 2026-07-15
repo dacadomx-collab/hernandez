@@ -110,6 +110,8 @@ label {
 }
 
 input,
+textarea,
+select,
 button {
     width: 100%;
     padding: var(--space-xs) var(--space-sm);
@@ -117,6 +119,10 @@ button {
     border: 1px solid var(--color-border);
     font-size: 1rem;
     font-family: inherit;
+}
+
+textarea {
+    resize: vertical;
 }
 
 button {
@@ -322,13 +328,225 @@ button:disabled {
     border-color: var(--color-text);
 }
 
-#gastos-lista {
+#gastos-lista,
+.pendientes-lista,
+#tareas-lista,
+#eventos-lista,
+.sud-lista,
+#obras-lista {
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
     flex-direction: column;
     gap: var(--space-xs);
+}
+
+#obras-lista li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-xs);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-xs);
+    font-size: 0.9rem;
+}
+
+#obras-lista button {
+    width: auto;
+    margin-top: 0;
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+}
+
+#obra-cancelar {
+    background-color: var(--color-border);
+    color: var(--color-text);
+}
+
+.sud-lista li {
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-xs);
+    font-size: 0.9rem;
+}
+
+.sud-lista li.is-bloqueado {
+    color: var(--color-text-muted);
+    font-style: italic;
+}
+
+.btn-pin {
+    width: 100%;
+    margin: var(--space-xs) 0;
+    background-color: var(--color-text);
+    color: #ffffff;
+}
+
+/* ── MODAL DE PIN (Módulo 5) ──────────────────────────────────────────────── */
+.pin-modal {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(44, 62, 80, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    padding: var(--space-md);
+}
+
+.pin-modal__card {
+    width: 100%;
+    max-width: 20rem;
+}
+
+.pin-modal__acciones {
+    display: flex;
+    gap: var(--space-xs);
+}
+
+.pin-modal__acciones button {
+    margin-top: 0;
+}
+
+#pin-cancelar-btn {
+    background-color: var(--color-border);
+    color: var(--color-text);
+}
+
+#eventos-lista li {
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-xs);
+    font-size: 0.9rem;
+}
+
+/* ── ALERTA DE COLISIÓN (Módulo 4) ────────────────────────────────────────── */
+.alerta-colision {
+    background-color: #fef3c7;
+    color: #92400e;
+    border: 1px solid #f59e0b;
+    border-radius: var(--radius);
+    padding: var(--space-xs) var(--space-sm);
+    font-size: 0.875rem;
+}
+
+.pendientes-lista li {
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-xs);
+    font-size: 0.9rem;
+}
+
+/* ── TAREAS (Módulo 2) ─────────────────────────────────────────────────────── */
+.tarea-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-sm);
+    font-size: 0.9rem;
+}
+
+.tarea-item__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-xs);
+}
+
+.tarea-item__acciones {
+    display: flex;
+    gap: var(--space-xs);
+}
+
+.tarea-item__acciones select,
+.tarea-item__acciones button {
+    width: auto;
+    margin-top: 0;
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.button-like {
+    display: inline-block;
+    width: auto;
+    margin-top: 0;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius);
+    border: none;
+    font-size: 0.8rem;
+    color: #ffffff;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.btn-whatsapp {
+    background-color: #25D366;
+}
+
+/* ── PENDIENTES (Módulo 3): columnas por categoría ────────────────────────── */
+.pendientes-columnas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    width: 100%;
+}
+
+.pendientes-columna {
+    flex: 1 1 100%;
+}
+
+@media (min-width: 768px) {
+    .pendientes-columna {
+        flex: 1 1 calc(33.333% - var(--space-md));
+    }
+}
+
+.pendientes-columna h3 {
+    font-size: 1rem;
+    margin-bottom: var(--space-xs);
+}
+
+.pendiente-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-xs);
+}
+
+.pendiente-item.is-completado span {
+    text-decoration: line-through;
+    color: var(--color-text-muted);
+}
+
+.pendiente-item__acciones {
+    display: flex;
+    gap: var(--space-xs);
+    flex-shrink: 0;
+}
+
+.pendiente-item__acciones button {
+    width: auto;
+    margin-top: 0;
+    font-size: 0.8rem;
+    padding: 0.15rem 0.4rem;
+}
+
+.pendiente-input-row {
+    display: flex;
+    gap: var(--space-xs);
+}
+
+.pendiente-input-row input {
+    flex: 1;
+}
+
+.pendiente-input-row button {
+    width: 3rem;
+    margin-top: 0;
+    flex-shrink: 0;
+}
+
+#mic-btn.is-listening {
+    background-color: #27AE60;
 }
 
 #gastos-lista li {

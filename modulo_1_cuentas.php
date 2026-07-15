@@ -28,7 +28,12 @@ $nombre = (string) $_SESSION['nombre'];
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cuentas Contables — Pte_Hernandez_LaPazBCS</title>
     <link rel="icon" href="favicon.ico">
-
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Pte. Hernández">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="assets/img/icon-192.png">
     <link rel="preload" href="assets/css/main.css" as="style">
     <link rel="stylesheet" href="assets/css/main.css">
 </head>
