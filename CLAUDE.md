@@ -196,3 +196,7 @@ Referencia completa: `knowledge/01_LEY_Y_MANDAMIENTOS.md`
 | Versión | Fecha | Cambio Principal |
 | :--- | :--- | :--- |
 | v1.0 | [FECHA_DE_INICIO] | Creación inicial del manual operativo |
+| v1.1 | 2026-07-14 | **FASE 0 (Fundaciones) — Completada y validada end-to-end.** Conexión PDO remota confirmada (`status_check.php`: `database.ok=true`), tablas `usuarios`/`obras`/`usuarios_obras` creadas, login con sesión PHP + RBAC de 3 roles (`admin`,`staff`,`presidente`) probado con usuarios reales |
+| v1.2 | 2026-07-14 | **FASE 1 (Seguridad y Layout Base) — Completada.** Dashboard ARF-Grid con 5 tarjetas (`col-6 col-md-4 col-lg-2`, `aspect-ratio:1/1`), RBAC server-side ocultando Módulos 3-5 a `staff`, PWA instalable (`manifest.json`, iconos, banner de instalación), Botón de Pánico con animación, `index.php` como Front Controller de raíz |
+| v1.3 | 2026-07-14 | **FASE 2 (Módulos Operativos) — Completada.** Módulo 1 (`permisos_obra`, `gastos` con Captura Express de foto), Módulo 2 (`tareas` + integración WhatsApp `wa.me`), Alta de Obras (`admin_obras.php`) — todos con RBAC vía `session_guard.php` |
+| v1.4 | 2026-07-14 | **FASE 3 (Módulos Privados e IA) — Completada.** Módulo 3 (`pendientes` + dictado por voz `SpeechRecognition` con guardado automático), Módulo 4 (`agenda_familiar` + Alerta de Colisión contra `tareas`), Módulo 5 (`pendientes_sud` + enmascarado server-side por PIN), pipeline CI/CD (`deploy.yml`) corregido y activo, limpieza de scripts de seed y de secretos huérfanos (`core/.env`) pre-producción |

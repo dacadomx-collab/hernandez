@@ -29,3 +29,21 @@ jobs:
             **/knowledge/**
             **/logs/**
             **/backups_y_pruebas/**
+
+      # Diagnóstico 2026-07-15: la raíz de producción devolvía 403 "Acceso
+      # denegado" incluso para rutas inexistentes (no 404) y para archivos
+      # estáticos sin lógica PHP — firma clásica de directorios sin bit de
+      # ejecución/tránsito (falta el permiso 'x') tras la subida FTP. Este
+      # paso corrige permisos directamente sobre el servidor de producción
+      # usando las mismas credenciales FTP del deploy. No bloquea el pipeline
+      # si el host no soporta SITE CHMOD (continue-on-error).
+      - name: 🔐 Corregir permisos (755) en el servidor tras el deploy
+        continue-on-error: true
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_REMOTE_DIR: ${{ secrets.FTP_REMOTE_DIR }}
+        run: |
+          sudo apt-get update -y && sudo apt-get install -y lftp
+          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -e "set ssl:verify-certificate no; set ftp:ssl-allow yes; chmod -R 755 \"$FTP_REMOTE_DIR\"; bye" "$FTP_SERVER"

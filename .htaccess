@@ -5,7 +5,9 @@
 # =============================================================================
 
 # ── NIVEL 0: SEGURIDAD GLOBAL ─────────────────────────────────────────────────
-Options -Indexes
+<IfModule mod_autoindex.c>
+    Options -Indexes
+</IfModule>
 DirectoryIndex index.php index.html
 ServerSignature Off
 
