@@ -20,6 +20,7 @@ if (empty($_SESSION['id_usuario']) || empty($_SESSION['rol']) || !in_array($_SES
 }
 
 $nombre = (string) $_SESSION['nombre'];
+$rol    = (string) $_SESSION['rol'];
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -86,6 +87,29 @@ $nombre = (string) $_SESSION['nombre'];
             <h2>Estado de Presupuesto</h2>
             <div id="presupuesto-estado"></div>
         </section>
+
+        <?php if (in_array($rol, ['admin', 'presidente'], true)): ?>
+        <section class="card arf-col-2" id="presupuesto-config-section">
+            <h2>Configurar Metas de Presupuesto</h2>
+            <p id="presupuesto-config-error" role="alert"></p>
+            <form id="presupuesto-config-form" autocomplete="off">
+                <label for="config-etapa">Etapa</label>
+                <select id="config-etapa" name="etapa" required>
+                    <option value="obras_base">Obras Base</option>
+                    <option value="obra_negra">Obra Negra</option>
+                    <option value="terminacion">Terminación</option>
+                </select>
+
+                <label for="config-concepto">Concepto</label>
+                <input type="text" id="config-concepto" name="concepto" placeholder="Barda, Cisterna, Fosa, Cimentación..." required>
+
+                <label for="config-monto-objetivo">Monto Objetivo</label>
+                <input type="number" id="config-monto-objetivo" name="monto_objetivo" min="0.01" step="0.01" required>
+
+                <button type="submit" id="presupuesto-config-submit">Guardar Meta de Presupuesto</button>
+            </form>
+        </section>
+        <?php endif; ?>
 
         <section class="card arf-col-2">
             <h2>Captura Express de Gasto</h2>

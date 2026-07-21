@@ -18,6 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const semaforoGrupos   = document.querySelectorAll('.semaforo-grupo');
     const presupuestoSelect = document.getElementById('id_presupuesto');
     const presupuestoEstado = document.getElementById('presupuesto-estado');
+    const presupuestoConfigForm   = document.getElementById('presupuesto-config-form');
+    const presupuestoConfigError  = document.getElementById('presupuesto-config-error');
+    const presupuestoConfigSubmit = document.getElementById('presupuesto-config-submit');
 
     let idObraActual = null;
 
@@ -210,6 +213,48 @@ document.addEventListener('DOMContentLoaded', () => {
             gastoSubmit.disabled = false;
         }
     });
+
+    if (presupuestoConfigForm) {
+        presupuestoConfigForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            presupuestoConfigError.textContent = '';
+
+            if (!idObraActual) {
+                presupuestoConfigError.textContent = 'Selecciona una obra primero.';
+                return;
+            }
+
+            presupuestoConfigSubmit.disabled = true;
+
+            try {
+                const res  = await fetch('api/presupuestos_backend.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        accion: 'crear',
+                        id_obra: idObraActual,
+                        etapa: document.getElementById('config-etapa').value,
+                        concepto: document.getElementById('config-concepto').value,
+                        monto_objetivo: document.getElementById('config-monto-objetivo').value,
+                    }),
+                });
+                const data = await res.json();
+
+                if (data.status !== 'success') {
+                    presupuestoConfigError.textContent = data.message || 'No se pudo guardar la meta de presupuesto.';
+                    return;
+                }
+
+                presupuestoConfigForm.reset();
+                await cargarPresupuestos();
+            } catch {
+                presupuestoConfigError.textContent = 'No se pudo contactar al servidor.';
+            } finally {
+                presupuestoConfigSubmit.disabled = false;
+            }
+        });
+    }
 
     cargarObras();
 });
