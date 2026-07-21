@@ -31,12 +31,12 @@ try {
             'SELECT o.`id`, o.`nombre`, o.`estatus`
              FROM `obras` o
              INNER JOIN `usuarios_obras` uo ON uo.`id_obra` = o.`id`
-             WHERE uo.`id_usuario` = :id_usuario
+             WHERE uo.`id_usuario` = :id_usuario AND o.`estatus` = \'activa\'
              ORDER BY o.`nombre` ASC'
         );
         $stmt->execute([':id_usuario' => (int) $_SESSION['id_usuario']]);
     } else {
-        $stmt = $pdo->query('SELECT `id`, `nombre`, `estatus` FROM `obras` ORDER BY `nombre` ASC');
+        $stmt = $pdo->query('SELECT `id`, `nombre`, `estatus` FROM `obras` WHERE `estatus` = \'activa\' ORDER BY `nombre` ASC');
     }
 
     $obras = $stmt->fetchAll(\PDO::FETCH_ASSOC);
