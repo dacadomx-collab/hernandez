@@ -82,12 +82,17 @@ $nombre = (string) $_SESSION['nombre'];
             </div>
         </section>
 
+        <section class="card" id="presupuesto-section">
+            <h2>Estado de Presupuesto</h2>
+            <div id="presupuesto-estado"></div>
+        </section>
+
         <section class="card arf-col-2">
             <h2>Captura Express de Gasto</h2>
             <p id="gasto-error" role="alert"></p>
             <form id="gasto-form" autocomplete="off">
-                <label for="concepto">Concepto</label>
-                <input type="text" id="concepto" name="concepto" placeholder="Barda, Cisterna, Fosa..." required>
+                <label for="id_presupuesto">Concepto (Presupuesto)</label>
+                <select id="id_presupuesto" name="id_presupuesto" required></select>
 
                 <label for="monto">Monto</label>
                 <input type="number" id="monto" name="monto" min="0.01" step="0.01" required>

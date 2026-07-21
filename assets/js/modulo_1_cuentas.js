@@ -10,14 +10,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const obraSelect  = document.getElementById('obra-select');
-    const gastoForm    = document.getElementById('gasto-form');
-    const gastoError   = document.getElementById('gasto-error');
-    const gastoSubmit  = document.getElementById('gasto-submit');
-    const gastosLista  = document.getElementById('gastos-lista');
-    const semaforoGrupos = document.querySelectorAll('.semaforo-grupo');
+    const obraSelect       = document.getElementById('obra-select');
+    const gastoForm        = document.getElementById('gasto-form');
+    const gastoError       = document.getElementById('gasto-error');
+    const gastoSubmit      = document.getElementById('gasto-submit');
+    const gastosLista      = document.getElementById('gastos-lista');
+    const semaforoGrupos   = document.querySelectorAll('.semaforo-grupo');
+    const presupuestoSelect = document.getElementById('id_presupuesto');
+    const presupuestoEstado = document.getElementById('presupuesto-estado');
 
     let idObraActual = null;
+
+    const ETAPA_ETIQUETAS = {
+        obras_base: 'Obras Base',
+        obra_negra: 'Obra Negra',
+        terminacion: 'Terminación',
+    };
+
+    function formatearMonto(valor) {
+        return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(valor);
+    }
 
     async function cargarObras() {
         try {
@@ -35,10 +47,66 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (data.data.obras.length > 0) {
                 idObraActual = data.data.obras[0].id;
-                await Promise.all([cargarSemaforos(), cargarGastos()]);
+                await Promise.all([cargarSemaforos(), cargarGastos(), cargarPresupuestos()]);
             }
         } catch {
             obraSelect.innerHTML = '<option>Error de conexión</option>';
+        }
+    }
+
+    async function cargarPresupuestos() {
+        if (!idObraActual) {
+            return;
+        }
+        try {
+            const res  = await fetch(`api/presupuestos_backend.php?accion=listar&id_obra=${idObraActual}`, { credentials: 'include' });
+            const data = await res.json();
+
+            if (data.status !== 'success' || data.data.presupuestos.length === 0) {
+                presupuestoSelect.innerHTML = '<option value="">Sin conceptos de presupuesto</option>';
+                presupuestoEstado.innerHTML = '<p>Esta obra aún no tiene conceptos de presupuesto registrados.</p>';
+                return;
+            }
+
+            const presupuestos = data.data.presupuestos;
+
+            presupuestoSelect.innerHTML = presupuestos
+                .map((p) => `<option value="${p.id}">${ETAPA_ETIQUETAS[p.etapa] || p.etapa} — ${p.concepto}</option>`)
+                .join('');
+
+            const porEtapa = presupuestos.reduce((acc, p) => {
+                (acc[p.etapa] ||= []).push(p);
+                return acc;
+            }, {});
+
+            presupuestoEstado.innerHTML = Object.keys(ETAPA_ETIQUETAS)
+                .filter((etapa) => porEtapa[etapa])
+                .map((etapa) => `
+                    <div class="presupuesto-etapa">
+                        <h3 class="presupuesto-etapa__titulo">${ETAPA_ETIQUETAS[etapa]}</h3>
+                        ${porEtapa[etapa].map((p) => {
+                            const pct = p.monto_objetivo > 0 ? (p.monto_gastado / p.monto_objetivo) * 100 : 0;
+                            const estadoClase = p.monto_gastado > p.monto_objetivo
+                                ? 'is-over'
+                                : (pct >= 90 ? 'is-warning' : 'is-ok');
+                            const anchoBarra = Math.min(pct, 100);
+                            return `
+                                <div class="presupuesto-item">
+                                    <div class="presupuesto-item__header">
+                                        <span class="presupuesto-item__concepto">${p.concepto}</span>
+                                        <span class="presupuesto-item__montos">${formatearMonto(p.monto_gastado)} / ${formatearMonto(p.monto_objetivo)}</span>
+                                    </div>
+                                    <div class="barra-progreso">
+                                        <div class="barra-progreso__fill ${estadoClase}" style="--progreso: ${anchoBarra}%"></div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `)
+                .join('');
+        } catch {
+            presupuestoEstado.innerHTML = '<p>No se pudo cargar el estado de presupuesto.</p>';
         }
     }
 
@@ -96,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     obraSelect.addEventListener('change', async (event) => {
         idObraActual = event.target.value;
-        await Promise.all([cargarSemaforos(), cargarGastos()]);
+        await Promise.all([cargarSemaforos(), cargarGastos(), cargarPresupuestos()]);
     });
 
     semaforoGrupos.forEach((grupo) => {
@@ -135,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             gastoForm.reset();
-            await cargarGastos();
+            await Promise.all([cargarGastos(), cargarPresupuestos()]);
         } catch {
             gastoError.textContent = 'No se pudo contactar al servidor.';
         } finally {

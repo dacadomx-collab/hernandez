@@ -610,3 +610,77 @@ button:disabled {
 .is-hidden {
     display: none;
 }
+
+/* ── ESTADO DE PRESUPUESTO (Módulo 1: Presupuesto vs. Gasto Real) ────────────
+   El ancho de .barra-progreso__fill se controla vía la custom property
+   --progreso (asignada por JS por elemento, valor calculado en tiempo real
+   a partir de monto_gastado/monto_objetivo — no es un estilo estático, por
+   lo que no viola la regla de cero-estilos-inline: el color y toda la forma
+   visual siguen viviendo aquí, solo el porcentaje dinámico va por variable. */
+.presupuesto-etapa {
+    margin-bottom: var(--space-md);
+}
+
+.presupuesto-etapa:last-child {
+    margin-bottom: 0;
+}
+
+.presupuesto-etapa__titulo {
+    font-size: 1rem;
+    margin: 0 0 var(--space-sm);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.presupuesto-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-sm);
+}
+
+.presupuesto-item__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-xs);
+    font-size: 0.9rem;
+}
+
+.presupuesto-item__concepto {
+    font-weight: 600;
+}
+
+.presupuesto-item__montos {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+}
+
+.barra-progreso {
+    width: 100%;
+    height: 0.6rem;
+    border-radius: var(--radius);
+    background-color: var(--color-border);
+    overflow: hidden;
+}
+
+.barra-progreso__fill {
+    height: 100%;
+    width: var(--progreso, 0%);
+    border-radius: var(--radius);
+    transition: width 0.2s ease-in-out;
+}
+
+.barra-progreso__fill.is-ok {
+    background-color: #27AE60;
+}
+
+.barra-progreso__fill.is-warning {
+    background-color: var(--color-accent);
+}
+
+.barra-progreso__fill.is-over {
+    background-color: var(--color-primary);
+}

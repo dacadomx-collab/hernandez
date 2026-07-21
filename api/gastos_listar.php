@@ -38,9 +38,11 @@ try {
     }
 
     $stmt = $pdo->prepare(
-        'SELECT g.`id`, g.`concepto`, g.`monto`, g.`fecha_gasto`, g.`foto_ticket`, u.`nombre` AS `registrado_por`
+        'SELECT g.`id`, g.`monto`, g.`fecha_gasto`, g.`foto_ticket`, u.`nombre` AS `registrado_por`,
+                COALESCE(p.`concepto`, g.`concepto`) AS `concepto`, p.`etapa` AS `etapa`
          FROM `gastos` g
          INNER JOIN `usuarios` u ON u.`id` = g.`id_usuario`
+         LEFT JOIN `presupuestos_obra` p ON p.`id` = g.`id_presupuesto`
          WHERE g.`id_obra` = :id_obra
          ORDER BY g.`fecha_gasto` DESC, g.`id` DESC'
     );

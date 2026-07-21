@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 // =============================================================================
 // api/gastos_create.php — Registra un gasto (Captura Express de recibo)
-// Método: POST multipart/form-data {id_obra, concepto, monto, fecha_gasto, foto?}
+// Método: POST multipart/form-data {id_obra, id_presupuesto, monto, fecha_gasto, foto?}
 // Auth: Sesión PHP + Role: admin, staff, presidente
 // =============================================================================
 
@@ -12,7 +12,6 @@ require_once __DIR__ . '/cors.php';
 require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/session_guard.php';
 require_once __DIR__ . '/../helpers/response.php';
-require_once __DIR__ . '/../helpers/input_sanitizer.php';
 require_once __DIR__ . '/../helpers/obra_access.php';
 require_once __DIR__ . '/../helpers/asfl_logger.php';
 
@@ -24,16 +23,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     send_error('Método no permitido.', 405);
 }
 
-$idObra     = (int) ($_POST['id_obra'] ?? 0);
-$concepto   = sanitize_string((string) ($_POST['concepto'] ?? ''), 100);
-$montoRaw   = (string) ($_POST['monto'] ?? '');
-$fechaGasto = (string) ($_POST['fecha_gasto'] ?? '');
+$idObra         = (int) ($_POST['id_obra'] ?? 0);
+$idPresupuesto  = (int) ($_POST['id_presupuesto'] ?? 0);
+$montoRaw       = (string) ($_POST['monto'] ?? '');
+$fechaGasto     = (string) ($_POST['fecha_gasto'] ?? '');
 
 if ($idObra <= 0) {
     send_error('id_obra es requerido.', 422);
 }
-if ($concepto === '') {
-    send_error('El concepto es requerido.', 422);
+if ($idPresupuesto <= 0) {
+    send_error('id_presupuesto es requerido.', 422);
 }
 if (!is_numeric($montoRaw) || (float) $montoRaw <= 0) {
     send_error('El monto debe ser un número mayor a 0.', 422);
@@ -81,17 +80,25 @@ try {
         send_error('No tienes acceso a esta obra.', 403);
     }
 
+    // El concepto presupuestado debe existir y pertenecer a la misma obra —
+    // evita registrar un gasto contra el presupuesto de otra obra.
+    $checkPresupuesto = $pdo->prepare('SELECT 1 FROM `presupuestos_obra` WHERE `id` = :id AND `id_obra` = :id_obra LIMIT 1');
+    $checkPresupuesto->execute([':id' => $idPresupuesto, ':id_obra' => $idObra]);
+    if ($checkPresupuesto->fetchColumn() === false) {
+        send_error('El concepto de presupuesto no es válido para esta obra.', 422);
+    }
+
     $stmt = $pdo->prepare(
-        'INSERT INTO `gastos` (`id_obra`, `id_usuario`, `concepto`, `monto`, `fecha_gasto`, `foto_ticket`)
-         VALUES (:id_obra, :id_usuario, :concepto, :monto, :fecha_gasto, :foto_ticket)'
+        'INSERT INTO `gastos` (`id_obra`, `id_usuario`, `id_presupuesto`, `monto`, `fecha_gasto`, `foto_ticket`)
+         VALUES (:id_obra, :id_usuario, :id_presupuesto, :monto, :fecha_gasto, :foto_ticket)'
     );
     $stmt->execute([
-        ':id_obra'     => $idObra,
-        ':id_usuario'  => (int) $_SESSION['id_usuario'],
-        ':concepto'    => $concepto,
-        ':monto'       => $monto,
-        ':fecha_gasto' => $fechaGasto,
-        ':foto_ticket' => $fotoTicketPath,
+        ':id_obra'        => $idObra,
+        ':id_usuario'     => (int) $_SESSION['id_usuario'],
+        ':id_presupuesto' => $idPresupuesto,
+        ':monto'          => $monto,
+        ':fecha_gasto'    => $fechaGasto,
+        ':foto_ticket'    => $fotoTicketPath,
     ]);
 
     $idGasto = (int) $pdo->lastInsertId();
@@ -99,12 +106,12 @@ try {
     asfl_log('RESPONSE', ['endpoint' => 'gastos_create.php', 'status' => 'success', 'id_gasto' => $idGasto]);
 
     send_success('Gasto registrado.', [
-        'id'          => $idGasto,
-        'id_obra'     => $idObra,
-        'concepto'    => $concepto,
-        'monto'       => $monto,
-        'fecha_gasto' => $fechaGasto,
-        'foto_ticket' => $fotoTicketPath,
+        'id'             => $idGasto,
+        'id_obra'        => $idObra,
+        'id_presupuesto' => $idPresupuesto,
+        'monto'          => $monto,
+        'fecha_gasto'    => $fechaGasto,
+        'foto_ticket'    => $fotoTicketPath,
     ], 201);
 
 } catch (\PDOException $e) {
