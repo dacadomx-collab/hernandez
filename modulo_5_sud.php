@@ -72,6 +72,8 @@ if (empty($_SESSION['id_usuario']) || empty($_SESSION['rol']) || $_SESSION['rol'
         <section class="arf-grid pendientes-columnas">
             <div class="card pendientes-columna" data-categoria="urgente_confidencial">
                 <h3>🔒 Urgente / Confidencial</h3>
+                <p id="bio-error" role="alert"></p>
+                <button type="button" id="bio-desbloquear-btn" class="btn-pin is-hidden">🔒 Desbloquear con FaceID/Huella</button>
                 <button type="button" id="pin-desbloquear-btn" class="btn-pin">Desbloquear con PIN</button>
                 <ul class="sud-lista"></ul>
             </div>

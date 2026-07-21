@@ -126,6 +126,7 @@ $rol    = (string) $_SESSION['rol'];
 
                 <label for="foto">Foto del recibo</label>
                 <input type="file" id="foto" name="foto" accept="image/*" capture="environment">
+                <p id="ocr-status" role="status"></p>
 
                 <button type="submit" id="gasto-submit">Registrar Gasto</button>
             </form>
@@ -137,6 +138,11 @@ $rol    = (string) $_SESSION['rol'];
         </section>
     </main>
 
+    <!-- OCR client-side de recibos (Módulo 1 — Escáner Inteligente de Recibos).
+         Versión fijada + integridad SRI: nunca cargar CDNs sin pin de versión. -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"
+            integrity="sha384-GJqSu7vueQ9qN0E9yLPb3Wtpd7OrgK8KmYzC8T1IysG1bcvxvIO4qtYR/D3A991F"
+            crossorigin="anonymous" defer></script>
     <script src="assets/js/modulo_1_cuentas.js" defer></script>
 </body>
 </html>

@@ -21,8 +21,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const presupuestoConfigForm   = document.getElementById('presupuesto-config-form');
     const presupuestoConfigError  = document.getElementById('presupuesto-config-error');
     const presupuestoConfigSubmit = document.getElementById('presupuesto-config-submit');
+    const fotoInput   = document.getElementById('foto');
+    const montoInput  = document.getElementById('monto');
+    const ocrStatus   = document.getElementById('ocr-status');
 
     let idObraActual = null;
+    let presupuestosActuales = [];
 
     const ETAPA_ETIQUETAS = {
         obras_base: 'Obras Base',
@@ -66,12 +70,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await res.json();
 
             if (data.status !== 'success' || data.data.presupuestos.length === 0) {
+                presupuestosActuales = [];
                 presupuestoSelect.innerHTML = '<option value="">Sin conceptos de presupuesto</option>';
                 presupuestoEstado.innerHTML = '<p>Esta obra aún no tiene conceptos de presupuesto registrados.</p>';
                 return;
             }
 
             const presupuestos = data.data.presupuestos;
+            presupuestosActuales = presupuestos;
 
             presupuestoSelect.innerHTML = presupuestos
                 .map((p) => `<option value="${p.id}">${ETAPA_ETIQUETAS[p.etapa] || p.etapa} — ${p.concepto}</option>`)
@@ -176,6 +182,83 @@ document.addEventListener('DOMContentLoaded', () => {
             dot.addEventListener('click', () => actualizarSemaforo(campo, dot.dataset.valor));
         });
     });
+
+    // ── Escáner Inteligente de Recibos (OCR client-side vía Tesseract.js) ────
+    // Fricción Cero: solo pre-llena Monto y Concepto — el usuario siempre
+    // revisa y presiona "Registrar Gasto" (nunca se auto-envía el formulario,
+    // es dinero real). Si el OCR falla o no encuentra nada, no pasa nada:
+    // el usuario captura los campos a mano exactamente como hoy.
+
+    function extraerMontoDeTexto(texto) {
+        // "total" pero no "subtotal" — y se prefiere la última coincidencia,
+        // porque el gran total suele aparecer después del desglose de subtotal/IVA.
+        const lineasTotal = texto.split('\n').filter((linea) => /(?<!sub)total/i.test(linea));
+        const lineaTotal = lineasTotal[lineasTotal.length - 1];
+        const candidatos = [];
+
+        for (const linea of [lineaTotal, texto].filter(Boolean)) {
+            const encontrados = linea.match(/\$?\s?\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})\b/g) || [];
+            encontrados.forEach((m) => {
+                const normalizado = m.replace(/\$|\s/g, '').replace(/,(?=\d{2}$)/, '.').replace(/,/g, '');
+                const valor = parseFloat(normalizado);
+                if (!Number.isNaN(valor) && valor > 0) {
+                    candidatos.push(valor);
+                }
+            });
+            if (candidatos.length > 0) {
+                break; // priorizar la línea que dice "total" si tuvo coincidencias
+            }
+        }
+
+        return candidatos.length > 0 ? Math.max(...candidatos) : null;
+    }
+
+    function normalizarTexto(str) {
+        return str.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    }
+
+    function detectarPresupuestoDeTexto(texto) {
+        const textoNormalizado = normalizarTexto(texto);
+        const coincidencias = presupuestosActuales.filter((p) => textoNormalizado.includes(normalizarTexto(p.concepto)));
+        if (coincidencias.length === 0) {
+            return null;
+        }
+        // El concepto más largo que coincide es el más específico (evita falsos positivos de palabras cortas).
+        return coincidencias.reduce((a, b) => (b.concepto.length > a.concepto.length ? b : a));
+    }
+
+    if (fotoInput) {
+        fotoInput.addEventListener('change', async () => {
+            ocrStatus.textContent = '';
+
+            const archivo = fotoInput.files[0];
+            if (!archivo || typeof Tesseract === 'undefined') {
+                return;
+            }
+
+            ocrStatus.textContent = 'Leyendo recibo…';
+
+            try {
+                const { data: { text } } = await Tesseract.recognize(archivo, 'spa');
+
+                const montoDetectado = extraerMontoDeTexto(text);
+                if (montoDetectado !== null) {
+                    montoInput.value = montoDetectado.toFixed(2);
+                }
+
+                const presupuestoDetectado = detectarPresupuestoDeTexto(text);
+                if (presupuestoDetectado) {
+                    presupuestoSelect.value = String(presupuestoDetectado.id);
+                }
+
+                ocrStatus.textContent = (montoDetectado !== null || presupuestoDetectado)
+                    ? 'Recibo leído — revisa los datos antes de registrar.'
+                    : 'No se detectaron datos automáticamente, captura manual.';
+            } catch {
+                ocrStatus.textContent = '';
+            }
+        });
+    }
 
     gastoForm.addEventListener('submit', async (event) => {
         event.preventDefault();

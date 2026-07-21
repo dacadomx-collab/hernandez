@@ -120,6 +120,7 @@ ServerSignature Off
     RewriteRule (^|/)node_modules(/|$)       - [F,L,NC]
     RewriteRule (^|/)scripts(/|$)            - [F,L,NC]
     RewriteRule (^|/)helpers(/|$)             - [F,L,NC]
+    RewriteRule (^|/)libs(/|$)                - [F,L,NC]
     RewriteRule (^|/)validators(/|$)          - [F,L,NC]
 
     # ── NIVEL 4: RUTAS FÍSICAS (assets, api) pasan sin reescritura ────────────

@@ -44,6 +44,11 @@ body {
     color: var(--color-text);
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
     line-height: 1.5;
+    overflow-wrap: break-word;
+}
+
+html {
+    overflow-x: hidden;
 }
 
 img,
@@ -344,6 +349,7 @@ button:disabled {
 
 #obras-lista li {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: var(--space-xs);
@@ -447,6 +453,7 @@ button:disabled {
 
 .tarea-item__row {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: var(--space-xs);
@@ -507,6 +514,7 @@ button:disabled {
 
 .pendiente-item {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: var(--space-xs);

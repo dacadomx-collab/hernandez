@@ -25,6 +25,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const pinDesbloquearBtn = document.getElementById('pin-desbloquear-btn');
     const pinConfirmarBtn   = document.getElementById('pin-confirmar-btn');
     const pinCancelarBtn    = document.getElementById('pin-cancelar-btn');
+    const bioDesbloquearBtn = document.getElementById('bio-desbloquear-btn');
+    const bioError          = document.getElementById('bio-error');
+
+    let bioTieneCredencial = false;
 
     const INACTIVIDAD_MS = 2 * 60 * 1000;
     let inactividadTimer = null;
@@ -113,6 +117,146 @@ document.addEventListener('DOMContentLoaded', () => {
     function cerrarModalPin() {
         pinModal.classList.add('is-hidden');
     }
+
+    // ── Desbloqueo Biométrico (WebAuthn) ─────────────────────────────────────
+    // Fricción Cero: si el dispositivo no soporta WebAuthn, o el usuario
+    // cancela/falla la verificación, el flujo cae automáticamente al modal
+    // de PIN — nunca deja al usuario sin forma de desbloquear.
+
+    function base64UrlToBuffer(base64url) {
+        const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
+        const padded = base64 + '='.repeat((4 - base64.length % 4) % 4);
+        const binario = window.atob(padded);
+        const buffer = new Uint8Array(binario.length);
+        for (let i = 0; i < binario.length; i += 1) {
+            buffer[i] = binario.charCodeAt(i);
+        }
+        return buffer.buffer;
+    }
+
+    function bufferToBase64Url(buffer) {
+        const bytes = new Uint8Array(buffer);
+        let binario = '';
+        bytes.forEach((b) => { binario += String.fromCharCode(b); });
+        return window.btoa(binario).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+
+    async function actualizarEstadoBiometria() {
+        if (!window.PublicKeyCredential) {
+            bioDesbloquearBtn.classList.add('is-hidden');
+            return;
+        }
+
+        try {
+            const res  = await fetch('api/biometria_backend.php?accion=estado', { credentials: 'include' });
+            const data = await res.json();
+
+            bioTieneCredencial = data.status === 'success' && data.data.tiene_credencial;
+            bioDesbloquearBtn.textContent = bioTieneCredencial
+                ? '🔒 Desbloquear con FaceID/Huella'
+                : '🔒 Registrar FaceID/Huella';
+            bioDesbloquearBtn.classList.remove('is-hidden');
+        } catch {
+            bioDesbloquearBtn.classList.add('is-hidden');
+        }
+    }
+
+    async function registrarBiometria() {
+        bioError.textContent = '';
+        try {
+            const res  = await fetch('api/biometria_backend.php?accion=registro_challenge', { credentials: 'include' });
+            const data = await res.json();
+            if (data.status !== 'success') {
+                bioError.textContent = data.message || 'No se pudo iniciar el registro biométrico.';
+                return;
+            }
+
+            const options = data.data.publicKey;
+            options.challenge = base64UrlToBuffer(options.challenge);
+            options.user.id   = base64UrlToBuffer(options.user.id);
+            if (options.excludeCredentials) {
+                options.excludeCredentials = options.excludeCredentials.map((c) => ({ ...c, id: base64UrlToBuffer(c.id) }));
+            }
+
+            const credencial = await navigator.credentials.create({ publicKey: options });
+
+            const res2 = await fetch('api/biometria_backend.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    accion: 'guardar_credencial',
+                    clientDataJSON: bufferToBase64Url(credencial.response.clientDataJSON),
+                    attestationObject: bufferToBase64Url(credencial.response.attestationObject),
+                }),
+            });
+            const data2 = await res2.json();
+
+            if (data2.status !== 'success') {
+                bioError.textContent = data2.message || 'No se pudo guardar la credencial biométrica.';
+                return;
+            }
+
+            await actualizarEstadoBiometria();
+        } catch {
+            bioError.textContent = 'No se pudo registrar la biometría en este dispositivo.';
+        }
+    }
+
+    async function desbloquearBiometria() {
+        bioError.textContent = '';
+        try {
+            const res  = await fetch('api/biometria_backend.php?accion=login_challenge', { credentials: 'include' });
+            const data = await res.json();
+            if (data.status !== 'success') {
+                abrirModalPin(); // fallback: no se pudo iniciar la verificación biométrica
+                return;
+            }
+
+            const options = data.data.publicKey;
+            options.challenge = base64UrlToBuffer(options.challenge);
+            if (options.allowCredentials) {
+                options.allowCredentials = options.allowCredentials.map((c) => ({ ...c, id: base64UrlToBuffer(c.id) }));
+            }
+
+            const asercion = await navigator.credentials.get({ publicKey: options });
+
+            const res2 = await fetch('api/biometria_backend.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    accion: 'verificar',
+                    credential_id: bufferToBase64Url(asercion.rawId),
+                    clientDataJSON: bufferToBase64Url(asercion.response.clientDataJSON),
+                    authenticatorData: bufferToBase64Url(asercion.response.authenticatorData),
+                    signature: bufferToBase64Url(asercion.response.signature),
+                }),
+            });
+            const data2 = await res2.json();
+
+            if (data2.status !== 'success') {
+                bioError.textContent = data2.message || 'Verificación biométrica fallida.';
+                abrirModalPin(); // fallback: la firma no fue válida
+                return;
+            }
+
+            await cargarPendientes();
+        } catch {
+            // Cancelado por el usuario o el dispositivo falló — cae al PIN sin fricción.
+            abrirModalPin();
+        }
+    }
+
+    bioDesbloquearBtn.addEventListener('click', () => {
+        if (bioTieneCredencial) {
+            desbloquearBiometria();
+        } else {
+            registrarBiometria();
+        }
+    });
+
+    actualizarEstadoBiometria();
 
     pinDesbloquearBtn.addEventListener('click', abrirModalPin);
     pinCancelarBtn.addEventListener('click', cerrarModalPin);
