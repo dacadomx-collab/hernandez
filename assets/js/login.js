@@ -33,8 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // TODO: apuntar a dashboard.php una vez maquetado (FASE 1 — pendiente).
-            window.location.href = 'index.html';
+            window.location.href = 'dashboard.php';
         } catch {
             errorEl.textContent = 'No se pudo contactar al servidor.';
             submitBtn.disabled = false;
