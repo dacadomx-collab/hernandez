@@ -4,6 +4,16 @@
 # PROPÓSITO : Blindaje Nivel Militar — AXON_DCD Security Standard v2
 # =============================================================================
 
+# ── PASO 1: APERTURA DE ACCESO (anula restricción 403 heredada del padre cPanel) ─
+<IfModule mod_authz_core.c>
+    Require all granted
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Allow from all
+</IfModule>
+Satisfy Any
+
 # ── NIVEL 0: SEGURIDAD GLOBAL ─────────────────────────────────────────────────
 <IfModule mod_autoindex.c>
     Options -Indexes
